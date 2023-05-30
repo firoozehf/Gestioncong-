@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="style.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <body>
+<header class="head">
+<nav>
+    <ul>
+      <li><a href="home.html">Accueil</a></li>
+      <li><a href="leaverequest.html">demander un congé</a></li>
+      <li><a href="requests.html">Mes demande</a></li>
+      <li><a href="mailto:pgoury@ifide.com">Contact directeur</a></li>
+      <li><a href="profile.html">Profile</a></li>
+    </ul>
+  </nav><br><br><br>
+  </header>
+<article class="signaler">
+    <h1>Signaler présence/absence</h1>
+    <form method="POST" enctype="multipart/form-data">
+        <label for="name">Nom :</label>
+        <input type="text" id="name" name="name" required><br><br>
+        <label for="date">Date :</label>
+        <input type="date" id="date" name="date" required><br><br>
+        <label for="status">Statut :</label>
+        <select id="status" name="status" required>
+            <option value="">--Choisir le statut--</option>
+            <option value="present">Présent</option>
+            <option value="absent">Absent</option>
+        </select>
+        <div id="file-container" style="display:none">
+            <label for="file"> <br>  Merci de justifier votre absence en téléchargeant un fichier :</label>
+            <input type="file" name="file"><br><br>
+        </div>
+        <input type="submit" value="Enregistrer">
+        
+    </form>
+ 
+</article>
+
+<div class="status">
+    <p>Statut actuel :</p>
+    <div id="current-status"></div>
+</div>
+
+<script>
+const form = document.querySelector('form');
+const currentStatus = document.getElementById('current-status');
+const fileContainer = document.getElementById('file-container');
+const fileInput = document.getElementById('file-input');
+const statusSelect = document.getElementById('status');
+
+statusSelect.addEventListener('change', function(e) {
+    if (e.target.value === 'absent') {
+        fileContainer.style.display = 'block';
+    } else {
+        fileContainer.style.display = 'none';
+    }
+});
+
+form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const name = this.elements.name.value;
+    const date = this.elements.date.value;
+    const status = this.elements.status.value;
+    if (status === 'present') {
+        currentStatus.innerHTML = `<p>${date} - Présent : <span class="present">${name}</span></p>`;
+    } else if (status === 'absent') {
+        if (!fileInput.files[0]) {
+            alert('Veuillez télécharger un fichier justificatif.');
+            return;
+        }
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('date', date);
+        formData.append('file', fileInput.files[0]);
+        fetch('upload_file.php', {
+            method: 'POST',
+            body: formData
+        }).then(function(response) {
+            if (response.ok) {
+                currentStatus.innerHTML = `<p>${date} - Absent : <span class="absent">${name}</span></p>`;
+            } else {
+                alert('Une erreur s\'est produite lors de la sauvegarde du fichier.');
+            }
+        });
+    }
+    this.reset();
+});
+
+</script>
+
+</main>
+</body>
+<footer class="footer-contact">
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <h3>Contact</h3>
+          <form>
+            <div class="form-group">
+              <label for="name">Nom :</label>
+              <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+              <label for="email">Email :</label>
+              <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+              <label for="message">Message :</label>
+              <textarea id="message" name="message" required></textarea>
+            </div>
+            <button type="submit">Envoyer</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </footer>
+</html>  
